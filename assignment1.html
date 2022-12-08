@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html;charset=utf-8" >
+        <title>CPC354 Assignment 1</title>
+
+        <script id="vertex-shader" type="x-shader/x-vertex">
+            attribute vec3 vPosition;
+            attribute vec3 vColor;
+            varying vec4 color;
+
+            uniform float scale;
+            uniform vec3 theta;
+            void main()
+            {
+                vec3 angles = radians( theta );
+                vec3 c = cos( angles );
+                vec3 s = sin( angles );
+
+                mat3 x = mat3( c.z, -s.z, 0.0, 
+                            s.z,  c.z, 0.0,
+                            0.0,  0.0, 1.0);
+
+                gl_Position = vec4( x * vPosition * scale, 1.0);
+                color = vec4(vColor, 1.0);
+            }
+        </script>
+
+        <script id="fragment-shader" type="x-shader/x-fragment">
+            precision mediump float;
+            
+            varying vec4 color;
+
+            void
+            main()
+            {
+                gl_FragColor = color;
+            }
+        </script>
+
+        <script type="text/javascript" src="Common/webgl-utils.js"></script>
+        <script type="text/javascript" src="Common/initShaders.js"></script>
+        <script type="text/javascript" src="Common/MV.js"></script>
+        <script type="text/javascript" src="assignment1.js"></script>
+    </head>   
+
+    <body>    
+        <canvas id="gl-canvas" width="512" height="512">
+            Oops ... your browser doesn't support the HTML5 canvas element
+        </canvas>
+        <br>
+        <input id="split" type="range" min="1" max="5" value="3" step="1" class="slider">Number of Subdivisions</input>
+        <br>
+        <input id="speed" type="range" min="0.2" max="5" value="1" step="0.2" class="slider">Speed of Animation</input>
+        <br>
+        <input id="color1" type="color" min="0" max="255" value="#ff0000" step="1" class="slider">Color1</input>
+        <br>
+        <input id="color2" type="color" min="0" max="255" value="#00ff00" step="1" class="slider">Color2</input>
+        <br>
+        <input id="color3" type="color" min="0" max="255" value="#0000ff" step="1" class="slider">Color3</input>
+        <br>
+        <button id="start">Start</button>
+        <button id="stop">Stop</button>
+    </body>
+</html>
