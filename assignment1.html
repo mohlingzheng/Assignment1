@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html>
     <head>
+        <link rel="stylesheet" href="styles.css">
         <meta http-equiv="Content-Type" content="text/html;charset=utf-8" >
         <title>CPC354 Assignment 1</title>
 
@@ -44,22 +45,44 @@
         <script type="text/javascript" src="assignment1.js"></script>
     </head>   
 
-    <body>    
-        <canvas id="gl-canvas" width="512" height="512">
-            Oops ... your browser doesn't support the HTML5 canvas element
-        </canvas>
-        <br>
-        <input id="split" type="range" min="1" max="5" value="3" step="1" class="slider">Number of Subdivisions</input>
-        <br>
-        <input id="speed" type="range" min="0.2" max="5" value="1" step="0.2" class="slider">Speed of Animation</input>
-        <br>
-        <input id="color1" type="color" min="0" max="255" value="#ff0000" step="1" class="slider">Color1</input>
-        <br>
-        <input id="color2" type="color" min="0" max="255" value="#00ff00" step="1" class="slider">Color2</input>
-        <br>
-        <input id="color3" type="color" min="0" max="255" value="#0000ff" step="1" class="slider">Color3</input>
-        <br>
-        <button id="start">Start</button>
-        <button id="stop">Stop</button>
+    <body>
+        <div class="float-parent-element" >
+
+            <div class="float-child-element">
+                <div class="button-section">
+                    <label>Number of Subdivisions</label>
+                    <br>
+                    <input id="split" class="range-input" type="range" min="1" max="5" value="3" step="1" class="slider"></input>
+                    <input id="split-text" class="text-input" min="1" max="5" value="3" step="1" type="number">
+                    <br>
+                    <label>Speed of Animation</label>
+                    <br>
+                    <input id="speed" class="range-input" type="range" min="0.2" max="5" value="1" step="0.2" class="slider"></input>
+                    <input id="speed-text" class="text-input" value="1" type="number" min="0.2" max="5" step="0.2">
+                    <br>
+                    <input id="color1" class="color-input" type="color" min="0" max="255" value="#ff0000" step="1" class="slider"></input>
+                    <label>Color 1</label>
+                    <br>
+                    <input id="color2" class="color-input" type="color" min="0" max="255" value="#00ff00" step="1" class="slider"></input>
+                    <label>Color 2</label>
+                    <br>
+                    <input id="color3" class="color-input" type="color" min="0" max="255" value="#0000ff" step="1" class="slider"></input>
+                    <label>Color 3</label>
+                    <br>
+                    <button id="start" class="basic-btn">Start</button>
+                    <button id="stop" class="basic-btn">Stop</button>
+                    <button id="reset" class="basic-btn">Reset</button>
+                    <br>
+                </div>
+            </div>
+
+            <div class="float-child-element">
+                <div class="canvas-section">
+                    <canvas id="gl-canvas" class="canvas-obj" width="512" height="512">
+                        Oops ... your browser doesn't support the HTML5 canvas element
+                    </canvas>
+                </div>
+            </div>    
+        </div>
     </body>
 </html>

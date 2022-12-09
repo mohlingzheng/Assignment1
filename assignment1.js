@@ -7,8 +7,10 @@ var points = [];
 var colors = [];
 
 var NumTimesToSubdivide = 3;
+const baseSplitNum = 3;
 
 var speed = 1.0;
+const baseSpeed = 1.0;
 
 // Rotation
 var axis = 2;
@@ -71,7 +73,7 @@ window.onload = function init()
 function WebGLSetup()
 {
     gl.viewport( 0, 0, canvas.width, canvas.height );
-    gl.clearColor( 0.5, 0.5, 0.5, 1.0 );
+    // gl.clearColor( 1.0, 1.0, 1.0, 0.0 );
 
     program = initShaders( gl, "vertex-shader", "fragment-shader" );
     gl.useProgram( program );
@@ -104,6 +106,7 @@ function buttonInteraction()
         animation();
         document.getElementById("start").disabled = true;
 		document.getElementById("stop").disabled = false;
+        document.getElementById("reset").disabled = true;
         document.getElementById("split").disabled = true;
         document.getElementById("speed").disabled = true;
         document.getElementById("color1").disabled = true;
@@ -116,6 +119,7 @@ function buttonInteraction()
         window.cancelAnimationFrame(animationState);
         document.getElementById("start").disabled = false;
 		document.getElementById("stop").disabled = true;
+        document.getElementById("reset").disabled = false;
         document.getElementById("split").disabled = false;
         document.getElementById("speed").disabled = false;
         document.getElementById("color1").disabled = false;
@@ -125,12 +129,45 @@ function buttonInteraction()
         scale = baseScale;
         enlargeSpeed = baseEnlargeSpeed * speed;
         theta[axis] = 0;
+        stage = StandBy;
+    }
+
+    document.getElementById("reset").onclick = function()
+    {
+        document.getElementById("split").value = baseSplitNum;
+        document.getElementById("split-text").value = baseSplitNum;
+        document.getElementById("speed").value = baseSpeed;
+        document.getElementById("speed-text").value = baseSpeed;
+        document.getElementById("color1").value = "#ff0000";
+        document.getElementById("color2").value = "#00ff00";
+        document.getElementById("color3").value = "#0000ff";
+        newColor[0][0] = 1;
+        newColor[0][1] = 0;
+        newColor[0][2] = 0;
+        newColor[1][0] = 0;
+        newColor[1][1] = 1;
+        newColor[1][2] = 0;
+        newColor[2][0] = 0;
+        newColor[2][1] = 0;
+        newColor[2][2] = 1;
+        NumTimesToSubdivide = baseSplitNum;
+        speed = baseSpeed;
+        rotateAngle = baseRotateSpeed * speed;
+        enlargeSpeed = baseEnlargeSpeed * speed;
+        buildShape();
     }
 
     document.getElementById("split").onchange = function()
     {
         NumTimesToSubdivide = this.value;
-        console.log(this.value);
+        document.getElementById("split-text").value = this.value;
+        buildShape();
+    }
+
+    document.getElementById("split-text").onchange = function()
+    {
+        NumTimesToSubdivide = this.value;
+        document.getElementById("split").value = this.value;
         buildShape();
     }
 
@@ -139,7 +176,15 @@ function buttonInteraction()
         speed = this.value;
         rotateAngle = baseRotateSpeed * speed;
         enlargeSpeed = baseEnlargeSpeed * speed;
-        console.log(this.value)
+        document.getElementById("speed-text").value = this.value;
+    }
+
+    document.getElementById("speed-text").onchange = function()
+    {
+        speed = this.value;
+        rotateAngle = baseRotateSpeed * speed;
+        enlargeSpeed = baseEnlargeSpeed * speed;
+        document.getElementById("speed").value = this.value;
     }
 
     document.getElementById("color1").onchange = function()
