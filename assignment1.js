@@ -6,38 +6,50 @@ var program;
 var points = [];
 var colors = [];
 
-var NumTimesToSubdivide = 3;
 const baseSplitNum = 3;
+var NumTimesToSubdivide = baseSplitNum;
 
-var speed = 1.0;
 const baseSpeed = 1.0;
+var speed = baseSpeed;
 
 // Rotation
-var axis = 2;
-var theta = [ 0, 0, 0 ]
 const baseRotateSpeed = 1.0;
-var rotateAngle = 1.0;
+const axis = 2;
+var theta = [ 0, 0, 0 ]
+var rotateAngle = baseRotateSpeed;
 var thetaLoc;
 
 // Scaling
-var scale = 0.5;
-const baseScale = 0.5;
+const baseScale = 0.3;
 const baseEnlargeSpeed = 0.002;
+const finalEnlargement = 1.5;
+var scale = baseScale;
 var enlargeSpeed = 0.002;
 var scaleLoc;
 
-var animationState;
+// Movement
+const baseMovementSpeed = 0.005;
+const horizontalBoundary = 1 - (0.8165 * baseScale * finalEnlargement);
+const verticalTopBoundary = 1 - (0.9428 * baseScale * finalEnlargement);
+const verticalBottomBoundary = -(1 - (0.4714 * baseScale * finalEnlargement));
+var horizontal = 0;
+var vertical = 0;
+var movement = vec3( 0.0, 0.0, 0.0 );
+var movementSpeed = baseMovementSpeed;
+var movementLoc;
 
-var count = 0;
 
-var stage = 0;
+// Animation Stage
 const StandBy = 0;
 const RotateRight = 1;
 const RotateLeft = 2;
-const RotateRight2 = 3;
+const ReturnOriginal = 3;
 const Enlarging = 4;
 const ReturnEnlarge = 5;
-const EndStage = 6;
+const RandomTransition = 6;
+const EndStage = 7;
+var animationState;
+var stage = StandBy;
 
 const vertices = [
     vec3(  0.0000,  0.0000, -1.0000 ),
@@ -96,6 +108,8 @@ function WebGLSetup()
 
     thetaLoc = gl.getUniformLocation(program, "theta"); 
     scaleLoc = gl.getUniformLocation(program, "scale");
+    movementLoc = gl.getUniformLocation(program, "movement");
+
 }
 
 function buttonInteraction()
@@ -103,6 +117,7 @@ function buttonInteraction()
     document.getElementById("start").onclick = function()
     {
         stage = RotateRight;
+        // stage = RandomTransition;
         animation();
         document.getElementById("start").disabled = true;
 		document.getElementById("stop").disabled = false;
@@ -125,11 +140,8 @@ function buttonInteraction()
         document.getElementById("color1").disabled = false;
         document.getElementById("color2").disabled = false;
         document.getElementById("color3").disabled = false;
-        rotateAngle = baseRotateSpeed * speed;
-        scale = baseScale;
-        enlargeSpeed = baseEnlargeSpeed * speed;
-        theta[axis] = 0;
-        stage = StandBy;
+        resetDefault();
+        buildShape();
     }
 
     document.getElementById("reset").onclick = function()
@@ -141,19 +153,15 @@ function buttonInteraction()
         document.getElementById("color1").value = "#ff0000";
         document.getElementById("color2").value = "#00ff00";
         document.getElementById("color3").value = "#0000ff";
-        newColor[0][0] = 1;
-        newColor[0][1] = 0;
-        newColor[0][2] = 0;
-        newColor[1][0] = 0;
-        newColor[1][1] = 1;
-        newColor[1][2] = 0;
-        newColor[2][0] = 0;
-        newColor[2][1] = 0;
-        newColor[2][2] = 1;
+        newColor = [
+            vec3(1.0, 0.0, 0.0),
+            vec3(0.0, 1.0, 0.0),
+            vec3(0.0, 0.0, 1.0),
+            vec3(0.0, 0.0, 0.0)
+        ];
         NumTimesToSubdivide = baseSplitNum;
         speed = baseSpeed;
-        rotateAngle = baseRotateSpeed * speed;
-        enlargeSpeed = baseEnlargeSpeed * speed;
+        resetDefault();
         buildShape();
     }
 
@@ -176,6 +184,7 @@ function buttonInteraction()
         speed = this.value;
         rotateAngle = baseRotateSpeed * speed;
         enlargeSpeed = baseEnlargeSpeed * speed;
+        movementSpeed = baseMovementSpeed * speed;
         document.getElementById("speed-text").value = this.value;
     }
 
@@ -184,6 +193,7 @@ function buttonInteraction()
         speed = this.value;
         rotateAngle = baseRotateSpeed * speed;
         enlargeSpeed = baseEnlargeSpeed * speed;
+        movementSpeed = baseMovementSpeed * speed;
         document.getElementById("speed").value = this.value;
     }
 
@@ -218,6 +228,16 @@ function buttonInteraction()
     }
 }
 
+function resetDefault(){
+    rotateAngle = baseRotateSpeed * speed;
+    enlargeSpeed = baseEnlargeSpeed * speed;
+    movementSpeed = baseMovementSpeed * speed;
+    theta[axis] = 0;
+    stage = StandBy;
+    movement = vec3(0.0, 0.0, 0.0);
+    scale = baseScale;
+}
+
 function buildShape()
 {
     points = []
@@ -249,10 +269,10 @@ function animation()
         theta[axis] += rotateAngle;
         if(theta[axis] <= -180){
             rotateAngle = -rotateAngle;
-            stage = RotateRight2;
+            stage = ReturnOriginal;
         }
     }
-    else if(stage == RotateRight2){
+    else if(stage == ReturnOriginal){
         theta[axis] += rotateAngle;
         if(theta[axis] + rotateAngle >=0){
             rotateAngle = 0;
@@ -262,18 +282,57 @@ function animation()
     }
     else if(stage == Enlarging){
         scale += enlargeSpeed;
-        if(scale >= baseScale*2){
+        if(scale >= baseScale*finalEnlargement){
             enlargeSpeed = -enlargeSpeed;
-            stage = ReturnEnlarge;
+            stage = RandomTransition;
         }
     }
     else if(stage == ReturnEnlarge){
         scale += enlargeSpeed;
         if(scale + enlargeSpeed <= baseScale){
             enlargeSpeed = 0
-            stage = EndStage;
+            stage = RandomTransition;
             scale = baseScale;
         }
+    }
+    else if(stage == RandomTransition){
+        if(horizontal == 0){
+            if(movement[0] - movementSpeed <= -horizontalBoundary){
+                movement[0] += movementSpeed;
+                horizontal = 1;
+            }
+            else{
+                movement[0] -= movementSpeed;
+            }    
+        }
+        if(horizontal == 1){
+            if(movement[0] + movementSpeed >= horizontalBoundary){
+                movement[0] -= movementSpeed;
+                horizontal = 0;
+            }
+            else{
+                movement[0] += movementSpeed;
+            }    
+        }
+        if(vertical == 0){
+            if(movement[1] - movementSpeed <= verticalBottomBoundary){
+                movement[1] += movementSpeed;
+                vertical = 1;
+            }
+            else{
+                movement[1] -= movementSpeed;
+            }    
+        }
+        if(vertical == 1){
+            if(movement[1] + movementSpeed >= verticalTopBoundary){
+                movement[1] -= movementSpeed;
+                vertical = 0;
+            }
+            else{
+                movement[1] += movementSpeed;
+            }    
+        }
+        
     }
     else if(stage == EndStage){
         stage = RotateRight;
@@ -342,6 +401,7 @@ function render()
 
     gl.uniform1f(scaleLoc, scale)
     gl.uniform3fv(thetaLoc, theta);
+    gl.uniform3fv(movementLoc, movement);
 
     gl.drawArrays( gl.TRIANGLES, 0, points.length );
 

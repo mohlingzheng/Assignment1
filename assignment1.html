@@ -12,6 +12,7 @@
 
             uniform float scale;
             uniform vec3 theta;
+            uniform vec3 movement;
             void main()
             {
                 vec3 angles = radians( theta );
@@ -22,7 +23,7 @@
                             s.z,  c.z, 0.0,
                             0.0,  0.0, 1.0);
 
-                gl_Position = vec4( x * vPosition * scale, 1.0);
+                gl_Position = vec4( (x * vPosition * scale) + movement, 1.0);
                 color = vec4(vColor, 1.0);
             }
         </script>
@@ -57,8 +58,8 @@
                     <br>
                     <label>Speed of Animation</label>
                     <br>
-                    <input id="speed" class="range-input" type="range" min="0.2" max="5" value="1" step="0.2" class="slider"></input>
-                    <input id="speed-text" class="text-input" value="1" type="number" min="0.2" max="5" step="0.2">
+                    <input id="speed" class="range-input" type="range" min="0.2" max="10" value="1" step="0.2" class="slider"></input>
+                    <input id="speed-text" class="text-input" value="1" type="number" min="0.2" max="10" step="0.2">
                     <br>
                     <input id="color1" class="color-input" type="color" min="0" max="255" value="#ff0000" step="1" class="slider"></input>
                     <label>Color 1</label>
