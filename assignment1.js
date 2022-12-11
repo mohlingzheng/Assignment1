@@ -3,18 +3,21 @@ var canvas;
 var gl;
 var program;
 
+// To store each points and respective colors
 var points = [];
 var colors = [];
 
+// To adjust number of splitting according to user input
 const baseSplitNum = 3;
 var NumTimesToSubdivide = baseSplitNum;
 
+// To adjust animation speed according to user input
 const baseSpeed = 1.0;
 var speed = baseSpeed;
 
 // Rotation
 const baseRotateSpeed = 1.0;
-const axis = 2;
+const axis = 2;                        // only rotate in Z-axis
 var theta = [ 0, 0, 0 ]
 var rotateAngle = baseRotateSpeed;
 var thetaLoc;
@@ -38,7 +41,6 @@ var movement = vec3( 0.0, 0.0, 0.0 );
 var movementSpeed = baseMovementSpeed;
 var movementLoc;
 
-
 // Animation Stage
 const StandBy = 0;
 const RotateRight = 1;
@@ -47,10 +49,13 @@ const ReturnOriginal = 3;
 const Enlarging = 4;
 const ReturnEnlarge = 5;
 const RandomTransition = 6;
-const EndStage = 7;
+const ThreeAnimation = 7;
+const EndStage = 8;
+
 var animationState;
 var stage = StandBy;
 
+// Starting vertices
 const vertices = [
     vec3(  0.0000,  0.0000, -1.0000 ),
     vec3(  0.0000,  0.9428,  0.3333 ),
@@ -58,6 +63,7 @@ const vertices = [
     vec3(  0.8165, -0.4714,  0.3333 )
 ];
 
+// Starting colors
 const baseColors = [
     vec3(1.0, 0.0, 0.0),
     vec3(0.0, 1.0, 0.0),
@@ -69,7 +75,6 @@ var newColor = baseColors;
 window.onload = function init()
 {
     canvas = document.getElementById( "gl-canvas" );
-    
     gl = WebGLUtils.setupWebGL( canvas );
     if ( !gl ) { alert( "WebGL isn't available" ); }
 
@@ -106,18 +111,20 @@ function WebGLSetup()
     gl.vertexAttribPointer( vPosition, 3, gl.FLOAT, false, 0, 0 );
     gl.enableVertexAttribArray( vPosition );
 
+    // Get the uniform variable from vertex shader
     thetaLoc = gl.getUniformLocation(program, "theta"); 
     scaleLoc = gl.getUniformLocation(program, "scale");
     movementLoc = gl.getUniformLocation(program, "movement");
 
 }
 
+// All buttons onclick or onchange is declared here
 function buttonInteraction()
 {
     document.getElementById("start").onclick = function()
     {
+        // First stage starts with rotate right animation
         stage = RotateRight;
-        // stage = RandomTransition;
         animation();
         document.getElementById("start").disabled = true;
 		document.getElementById("stop").disabled = false;
@@ -163,6 +170,20 @@ function buttonInteraction()
         speed = baseSpeed;
         resetDefault();
         buildShape();
+    }
+
+    document.getElementById("animation2").onclick = function()
+    {
+        stage = ThreeAnimation;
+        animation();
+        document.getElementById("start").disabled = true;
+		document.getElementById("stop").disabled = false;
+        document.getElementById("reset").disabled = true;
+        document.getElementById("split").disabled = true;
+        document.getElementById("speed").disabled = true;
+        document.getElementById("color1").disabled = true;
+        document.getElementById("color2").disabled = true;
+        document.getElementById("color3").disabled = true;
     }
 
     document.getElementById("split").onchange = function()
@@ -227,7 +248,7 @@ function buttonInteraction()
         buildShape();
     }
 }
-
+// Set the value to default when clicking reset or stop button
 function resetDefault(){
     rotateAngle = baseRotateSpeed * speed;
     enlargeSpeed = baseEnlargeSpeed * speed;
@@ -237,7 +258,7 @@ function resetDefault(){
     movement = vec3(0.0, 0.0, 0.0);
     scale = baseScale;
 }
-
+// Build the gasket according to number of splits and the colors
 function buildShape()
 {
     points = []
@@ -247,7 +268,7 @@ function buildShape()
     WebGLSetup()
     render()
 }
-
+// Convert Hex color in html to RGB in JS
 function convertHexToRGB(tempColor){
     var rgb = new vec3();
     rgb.x =(parseInt(tempColor.slice(1,3), 16) / 255);
@@ -255,49 +276,105 @@ function convertHexToRGB(tempColor){
     rgb.z =(parseInt(tempColor.slice(5,7), 16) / 255);;
     return rgb;
 }
-
+// Animation stage accordingly
 function animation()
 {
+    // Rotate right is the first stage
     if(stage == RotateRight){
-        theta[axis] += rotateAngle;
-        if(theta[axis] >= 180){
-            rotateAngle = -rotateAngle;
-            stage = RotateLeft;
+        theta[axis] += rotateAngle;         // increase the angle of rotation each frame
+        if(theta[axis] >= 180){             // if angle is more than 180 degree, stop the rotation
+            rotateAngle = -rotateAngle;     // change rotation direction to anti-clockwise
+            stage = RotateLeft;             // move to the next stage
         }
     }
+    // Rotate left is the second stage
     else if(stage == RotateLeft){
-        theta[axis] += rotateAngle;
+        theta[axis] += rotateAngle;         // keep rotating to left until it reaches -180 degree
         if(theta[axis] <= -180){
-            rotateAngle = -rotateAngle;
-            stage = ReturnOriginal;
+            rotateAngle = -rotateAngle;     // rotation direction back to clockwise
+            stage = ReturnOriginal;         // move to next stage
         }
     }
+    // Rotate to original position is third stage
     else if(stage == ReturnOriginal){
-        theta[axis] += rotateAngle;
+        theta[axis] += rotateAngle;             // rotate until angle is 0
         if(theta[axis] + rotateAngle >=0){
             rotateAngle = 0;
-            stage = Enlarging;
+            stage = Enlarging;                  // move to scaling stage
             theta[axis] = 0
         }
     }
     else if(stage == Enlarging){
-        scale += enlargeSpeed;
-        if(scale >= baseScale*finalEnlargement){
+        scale += enlargeSpeed;                          // scale increases in each frame
+        if(scale >= baseScale*finalEnlargement){        // when reaching stated enlargement value, stop the scaling
             enlargeSpeed = -enlargeSpeed;
-            stage = RandomTransition;
+            stage = RandomTransition;                   // move to random transition stage
         }
     }
-    else if(stage == ReturnEnlarge){
-        scale += enlargeSpeed;
-        if(scale + enlargeSpeed <= baseScale){
-            enlargeSpeed = 0
-            stage = RandomTransition;
-            scale = baseScale;
-        }
-    }
+    // Random transition until stop button is clicked
     else if(stage == RandomTransition){
+        // move negative x direction (move left)
         if(horizontal == 0){
+            // if it hits the boundary, change direction
             if(movement[0] - movementSpeed <= -horizontalBoundary){
+                movement[0] += movementSpeed;
+                horizontal = 1;
+            }
+            // else keep moving
+            else{
+                movement[0] -= movementSpeed;
+            }    
+        }
+        // move positive x direction (move right)
+        if(horizontal == 1){
+            // if it hits the boundary, change direction
+            if(movement[0] + movementSpeed >= horizontalBoundary){
+                movement[0] -= movementSpeed;
+                horizontal = 0;
+            }
+            // else keep moving
+            else{
+                movement[0] += movementSpeed;
+            }    
+        }
+        // move negative y direction （move down)
+        if(vertical == 0){
+            // if it hits the boundary, change direction
+            if(movement[1] - movementSpeed <= verticalBottomBoundary){
+                movement[1] += movementSpeed;
+                vertical = 1;
+            }
+            // else keep moving
+            else{
+                movement[1] -= movementSpeed;
+            }    
+        }
+        // move positice y direction (move up)
+        if(vertical == 1){
+            // if it hits the boundary, change direction
+            if(movement[1] + movementSpeed >= verticalTopBoundary){
+                movement[1] -= movementSpeed;
+                vertical = 0;
+            }
+            // else keep moving
+            else{
+                movement[1] += movementSpeed;
+            }    
+        }
+        
+    }
+    // Extend functionalities with three animation all together (transition, scaling, rotation)
+    else if(stage == ThreeAnimation){
+        // set boundry
+        var tempHorizontalBoundary = 1 - (0.8165 * scale);
+        var tempVerticalBoundary = 1 - (0.4714 * 2 * scale);
+        
+        // rotation
+        theta[axis] += rotateAngle;
+
+        // transition
+        if(horizontal == 0){
+            if(movement[0] - movementSpeed <= -tempHorizontalBoundary){
                 movement[0] += movementSpeed;
                 horizontal = 1;
             }
@@ -306,7 +383,7 @@ function animation()
             }    
         }
         if(horizontal == 1){
-            if(movement[0] + movementSpeed >= horizontalBoundary){
+            if(movement[0] + movementSpeed >= tempHorizontalBoundary){
                 movement[0] -= movementSpeed;
                 horizontal = 0;
             }
@@ -315,7 +392,7 @@ function animation()
             }    
         }
         if(vertical == 0){
-            if(movement[1] - movementSpeed <= verticalBottomBoundary){
+            if(movement[1] - movementSpeed <= -tempVerticalBoundary){
                 movement[1] += movementSpeed;
                 vertical = 1;
             }
@@ -324,7 +401,7 @@ function animation()
             }    
         }
         if(vertical == 1){
-            if(movement[1] + movementSpeed >= verticalTopBoundary){
+            if(movement[1] + movementSpeed >= tempVerticalBoundary){
                 movement[1] -= movementSpeed;
                 vertical = 0;
             }
@@ -332,22 +409,23 @@ function animation()
                 movement[1] += movementSpeed;
             }    
         }
-        
-    }
-    else if(stage == EndStage){
-        stage = RotateRight;
-        rotateAngle = baseRotateSpeed * speed;
-        scale = baseScale;
-        enlargeSpeed = baseEnlargeSpeed * speed;
+
+        // scale up and down
+        scale += enlargeSpeed;
+        if(scale > baseScale * finalEnlargement){
+            enlargeSpeed = -enlargeSpeed;
+        }
+        else if(scale < baseScale){
+            enlargeSpeed = -enlargeSpeed;
+        }
+
     }
     animationState = requestAnimFrame(animation);
 }
 
 function triangle( a, b, c, color )
 {
-
     // add colors and vertices for one triangle
-
     colors.push( newColor[color] );
     points.push( a );
     colors.push( newColor[color] );
@@ -358,9 +436,7 @@ function triangle( a, b, c, color )
 
 function tetra( a, b, c, d )
 {
-    // tetrahedron with each side using
-    // a different color
-    
+    // tetrahedron with each side using a different color
     triangle( a, c, b, 0 );
     triangle( a, c, d, 1 );
     triangle( a, b, d, 2 );
@@ -370,14 +446,11 @@ function tetra( a, b, c, d )
 function divideTetra( a, b, c, d, count )
 {
     // check for end of recursion
-    
     if ( count === 0 ) {
         tetra( a, b, c, d );
     }
     
-    // find midpoints of sides
-    // divide four smaller tetrahedra
-    
+    // find midpoints of sides, divide four smaller tetrahedra
     else {
         var ab = mix( a, b, 0.5 );
         var ac = mix( a, c, 0.5 );
@@ -399,6 +472,7 @@ function render()
 {
     gl.clear( gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
+    // Pass uniform value to vertex shader
     gl.uniform1f(scaleLoc, scale)
     gl.uniform3fv(thetaLoc, theta);
     gl.uniform3fv(movementLoc, movement);
