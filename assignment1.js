@@ -128,6 +128,7 @@ function buttonInteraction()
         animation();
         document.getElementById("start").disabled = true;
 		document.getElementById("stop").disabled = false;
+        document.getElementById("animation2").disabled = true;
         document.getElementById("reset").disabled = true;
         document.getElementById("split").disabled = true;
         document.getElementById("speed").disabled = true;
@@ -141,6 +142,7 @@ function buttonInteraction()
         window.cancelAnimationFrame(animationState);
         document.getElementById("start").disabled = false;
 		document.getElementById("stop").disabled = true;
+        document.getElementById("animation2").disabled = false;
         document.getElementById("reset").disabled = false;
         document.getElementById("split").disabled = false;
         document.getElementById("speed").disabled = false;
@@ -178,6 +180,7 @@ function buttonInteraction()
         animation();
         document.getElementById("start").disabled = true;
 		document.getElementById("stop").disabled = false;
+        document.getElementById("animation2").disabled = true;
         document.getElementById("reset").disabled = true;
         document.getElementById("split").disabled = true;
         document.getElementById("speed").disabled = true;
