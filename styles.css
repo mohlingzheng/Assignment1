@@ -1,4 +1,7 @@
+@import url("https://fonts.googleapis.com/css?family=Poppins:100,200,300,400,500,600,700,800,900");
+
 body{
+
     margin: 10px;
     padding: 10px;
     background-image: url(https://4kwallpapers.com/images/wallpapers/silhouette-mountain-starry-sky-night-time-purple-sky-3385x2281-4277.jpg);
@@ -25,15 +28,15 @@ body{
   h1 {
     margin: 0;
   }
-  
+
+  @font-palette-values --Yellows {
+    font-family: Rocher;
+    base-palette: 0;
+  }
+
   @font-palette-values --Grays {
     font-family: Rocher;
     base-palette: 9;
-  }
-  
-  @font-palette-values --Purples {
-    font-family: Rocher;
-    base-palette: 6;
   }
   
   @font-palette-values --Mint {
@@ -41,17 +44,18 @@ body{
     base-palette: 7;
   }
   
+  .yellows {
+    font-palette: --Yellows;
+  }
+
   .grays {
     font-palette: --Grays;
-  }
-  
-  .purples {
-    font-palette: --Purples;
   }
   
   .mint {
     font-palette: --Mint;
     margin-bottom: 50px;
+    padding-left: 20px;
   }
 
 .float-parent-element {
@@ -69,7 +73,7 @@ body{
 }
 
 .button-section {
-    margin-left: 30px;
+    margin-bottom: 0px;
 }
 
 .canvas-section {
@@ -79,18 +83,23 @@ body{
 }
 
 .basic-btn {
+    font-palette: --Yellows;
+    font-family: Rocher;
     width: 20%;
-    margin: 5px;
+    margin-left: 40px;
+    margin-top: 5px;
+    margin-bottom: 5px;
     cursor: pointer;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
     -webkit-transition-duration: 0.3s;
     transition-duration: 0.3s;
     -webkit-transition-property: box-shadow, transform;
     transition-property: box-shadow, transform;
-    background-color: purple;
+    background-color: rgb(102, 44, 119);
     color: white;
     border: 1.5px solid black;
 }
+
 .basic-btn:hover, .basic-btn:focus, .basic-btn:active {
     box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
     -webkit-transform: scale(1.1);
@@ -99,7 +108,7 @@ body{
 
 .range-input {
     width: 50%;
-    margin: 5px;
+    margin-left: 50px;
 }
 
 .text-input{
@@ -111,8 +120,23 @@ body{
     font-family:'Times New Roman', Times, serif;
 }
 
+.column { 
+    float: left; 
+    width: 5%;
+    height: 250px; 
+} 
+
+.box { 
+    border-radius: 20px; 
+    margin-left: 10px; 
+    margin-right: auto; 
+    padding-top: auto; 
+    padding-bottom: 20px; 
+    width: 500px; 
+} 
+
 label{
-    padding-left: 15px;
+    padding-left: 30px;
     color: white;
 }
 
@@ -135,7 +159,9 @@ input[type="range"]::after{
 
 .color-input {
     width: 20%;
-    margin: 5px;
+    margin-left: 40px;
+    margin-top: 5px;
+    margin-bottom: 5px;
 }
 
 .canvas-obj {
